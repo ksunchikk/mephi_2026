@@ -1,3 +1,6 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,6 +32,8 @@
 </head>
 <body>
     <?php
+
+        echo "<h2>Привет, " . $_SESSION['name'] . "!</h2>";
         // $x = 2;
         // $y = 2;
         // $z = $x + $y;
