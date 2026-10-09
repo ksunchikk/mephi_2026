@@ -46,13 +46,55 @@
         border: none;
         border-radius: 5px;
       }
+
+      button:disabled {
+        background-color: #d8d8d8;
+      }
     </style>
     <script>
-      function calculateSum() {
+      // function calculateSum() {
+      //   let x = parseFloat(document.getElementById("x").value);
+      //   let y = parseFloat(document.getElementById("y").value);
+      //   let z = x + y;
+      //   document.getElementById("z").value = z;
+      // }
+      function setDisabled(disabled) {
+        document.getElementById('plus').disabled = disabled;
+        document.getElementById('minus').disabled = disabled;
+        document.getElementById('mult').disabled = disabled;
+      }
+
+      function calculate(operation) {
+        setDisabled(true);
+        document.getElementById('z').value = 'Производим расчет...'
         let x = parseFloat(document.getElementById("x").value);
         let y = parseFloat(document.getElementById("y").value);
-        let z = x + y;
-        document.getElementById("z").value = z;
+
+        const xhr = new XMLHttpRequest();
+
+        const url = `api/operations_service.php?operation=${operation}&x=${x}&y=${y}`;
+
+        xhr.open('GET', url);
+
+        console.log('Запрос отправляется!');
+
+        xhr.onload = function () {
+          console.log('Ответ получен: ', xhr.responseText);
+          setDisabled(false);
+
+          if(xhr.status === 200) {
+            document.getElementById("z").value = xhr.responseText;
+          } else if (xhr.status === 401) {
+            window.location.href = "login.html";
+          } else {
+            document.getElementById("z").value = '';
+            alert(`Ошибка ${xhr.status}: ${xhr.responseText}`)
+          }
+          
+        }
+
+        xhr.send();
+
       }
     </script>
   </head>
@@ -67,10 +109,13 @@
       <label for="y">Y</label>
       <input class="number" id="y" />
     </div>
-    <button onclick="calculateSum()">+</button>
+    <button id="plus" onclick="calculate('plus')">+</button>
+    <button id="minus" onclick="calculate('minus')">-</button>
+    <button id="mult" onclick="calculate('mult')">*</button>
     <div class="field">
       <label for="z">Z</label>
       <input id="z" />
     </div>
+    <textarea></textarea>
   </body>
 </html>
