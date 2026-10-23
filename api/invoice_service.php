@@ -6,6 +6,8 @@
         exit;
     }
 
+    $allowed = ['operation_date', 'operation', 'x', 'y', 'z'];
+
     $date_from = '2000-01-01'; // очень давно
     $date_to = '2100-01-01'; // очень нескоро
 
@@ -17,10 +19,35 @@
         $date_to = $_GET['date_to'];
     }
 
+    $sort = 'operation_date';
+    $dir = 'DESC';
+
+    if(isset($_GET['sort']) && in_array($_GET['sort'], $allowed)) {
+        $sort = $_GET['sort'];
+    }
+
+    if(isset($_GET['dir']) && $_GET['dir'] == 'ASC') {
+        $dir = $_GET['dir'];
+    }
+
     $host = 'localhost';
     $username = 'root';
     $password_db = '';
     $db = 'calc';
+
+    $limit = 5;
+
+    $page = 1;
+
+    if(!empty($_GET['page'])) {
+        $page = (int) $_GET['page'];
+    }
+
+    if ($page < 1) {
+        $page = 1;
+    }
+
+    $offset = ($page - 1) * $limit;
 
     $mysqli = new mysqli($host, $username, $password_db, $db);
 
@@ -31,10 +58,10 @@
 
     $login = $_SESSION['login'];
 
-    $query = "SELECT operation_date, x, y, z, operation FROM operation WHERE login = ? AND DATE(operation_date) BETWEEN ? AND ?";
+    $query = "SELECT operation_date, x, y, z, operation FROM operation WHERE login = ? AND DATE(operation_date) BETWEEN ? AND ? ORDER BY $sort $dir LIMIT ? OFFSET ?";
 
     $result = $mysqli->prepare($query);
-    $result->bind_param('sss', $login, $date_from, $date_to);
+    $result->bind_param('sssdd', $login, $date_from, $date_to, $limit, $offset);
 
     $result->execute();
 
